@@ -58,10 +58,6 @@ void FCameraCommandHandler::RegisterCommands()
 	Cmd = FDispatcherDelegate::CreateRaw(this, &FCameraCommandHandler::GetScreenshot);
 	Help = "Get snapshot from camera";
 	CommandDispatcher->BindCommand("vget /camera/[uint]/screenshot", Cmd, Help);
-
-	Cmd = FDispatcherDelegate::CreateRaw(this, &FObjectCommandHandler::GetObjectTags);
-	Help = "[debug] Get the object tags";
-	CommandDispatcher->BindCommand(TEXT("vget /object/[str]/tags"), Cmd, Help);
 	
 	Cmd = FDispatcherDelegate::CreateRaw(this, &FCameraCommandHandler::GetCameraLocation);
 	Help = "Get camera location [x, y, z]";
@@ -186,31 +182,6 @@ FExecStatus FCameraCommandHandler::MoveTo(const TArray<FString>& Args)
 	}
 	return FExecStatus::InvalidArgument;
 }
-
-/** Get the tags of an object */
-FExecStatus FObjectCommandHandler::GetObjectTags(const TArray<FString>& Args) {
-
-	if (Args.Num() == 1)
-	{
-		FString ObjectName = Args[0];
-		AActor* Object = FObjectPainter::Get().GetObject(ObjectName);
-		if (Object == NULL)
-		{
-			return FExecStatus::Error(FString::Printf(TEXT("Can not find object %s"), *ObjectName));
-		}
-
-		FString allTags = FString();
-		FString seperator = FName(TEXT(";")).ToString();
-		for (int k=0;k < Object->Tags.Num();k++) {
-			allTags += Object->Tags[k].ToString();
-			if (k < Object->Tags.Num() - 1)
-				allTags += seperator;
-		}
-		return FExecStatus::OK(FString::Printf(TEXT("%s"), *allTags));
-	}
-	return FExecStatus::InvalidArgument;
-};
-
 
 FExecStatus FCameraCommandHandler::SetCameraLocation(const TArray<FString>& Args)
 {
