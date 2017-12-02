@@ -30,6 +30,10 @@ void FObjectCommandHandler::RegisterCommands()
 	Help = "[debug] Get the object name";
 	CommandDispatcher->BindCommand(TEXT("vget /object/[str]/name"), Cmd, Help);
 
+	Cmd = FDispatcherDelegate::CreateRaw(this, &FObjectCommandHandler::GetObjectTags);
+	Help = "[debug] Get the object tags";
+	CommandDispatcher->BindCommand(TEXT("vget /object/[str]/tags"), Cmd, Help);
+	
 	Cmd = FDispatcherDelegate::CreateRaw(this, &FObjectCommandHandler::GetObjectLocation);
 	Help = "Get object location [x, y, z]";
 	CommandDispatcher->BindCommand(TEXT("vget /object/[str]/location"), Cmd, Help);
@@ -79,6 +83,30 @@ FExecStatus FObjectCommandHandler::SetObjectColor(const TArray<FString>& Args)
 
 	return FExecStatus::InvalidArgument;
 }
+
+	/** Get the tags of an object */
+FExecStatus FObjectCommandHandler::GetObjectTags(const TArray<FString>& Args) {
+
+	if (Args.Num() == 1)
+	{
+		FString ObjectName = Args[0];
+		AActor* Object = FObjectPainter::Get().GetObject(ObjectName);
+		if (Object == NULL)
+		{
+			return FExecStatus::Error(FString::Printf(TEXT("Can not find object %s"), *ObjectName));
+		}
+
+		FString allTags = FString();
+		FString seperator = FName(TEXT(";")).ToString();
+		for (int k=0;k < Object->Tags.Num();k++) {
+			allTags += Object->Tags[k].ToString();
+			if (k < Object->Tags.Num() - 1)
+				allTags += seperator;
+		}
+		return FExecStatus::OK(FString::Printf(TEXT("%s"), *allTags));
+	}
+	return FExecStatus::InvalidArgument;
+};
 
 FExecStatus FObjectCommandHandler::GetObjectColor(const TArray<FString>& Args)
 {
